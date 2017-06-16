@@ -21,7 +21,13 @@ function Get-scheduledjobz {
         [switch]
         $Enabled,
         [string]
-        $TaskName
+        $TaskName,
+        [string]
+        $Trigger,
+        [string]
+        $Path,
+        [string]
+        $Name
     )
 
     begin {
@@ -63,6 +69,7 @@ process {
     $tasks = $rootFolder.GetTasks(1)
     $testarray=@()
     $tasksxml=@()
+    $ArrayForWriteScheduledjobz=@()
     $Tasks | Foreach-Object {
         $currentTask = New-Object -TypeName PSCustomObject -Property @{
 	        'Name' = $_.name
@@ -89,26 +96,22 @@ process {
             }   
     
         
-        $testarray+=$currentTask
-        $tasksxml+=([xml]$_.xml).Task
+
         
         if ($finalFilter) {
             $ruleMatch=$currentTask | Where-Object $scriptblock 
             if ($rulematch) {
-                ([xml]$_.xml).Task
-                $rulematch
+                #([xml]$_.xml).Task
+                #$rulematch
                 Remove-Variable ruleMatch
+               $ArrayForWriteScheduledjobz=([xml]$_.xml).Task 
             }
         }
         else {$currentTask}
         }   
-   
-   
-   #if ($finalFilter) {
-   #     Write-Verbose -Message $scriptblock.gettype()
-   #     $testarray |  Where-Object $scriptBlock
-   # }
-   # else {$testarray}
+
+   return ,$ArrayForWriteScheduledjobz
+  
 
     
 
@@ -116,8 +119,24 @@ process {
 }
 
 
-function Get-writescheduledjobz {
-    write-output 'placeholder'
+function write-scheduledjobz {
+    param (
+        [string]
+        $Filter,
+        [string]
+        $UserName,
+        [switch]
+        $Enabled,
+        [string]
+        $TaskName,
+        [string]
+        $Trigger,
+        [string]
+        $Name
+    )
+
+$GetTaskResults=Get-ScheduledJobz -enabled
+$GetTaskResults
 
 }
 
