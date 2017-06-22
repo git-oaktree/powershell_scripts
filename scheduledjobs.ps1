@@ -67,9 +67,9 @@ process {
     $TaskScheduler.Connect($Null)
     $RootFolder = $TaskScheduler.GetFolder('\')
     $tasks = $rootFolder.GetTasks(1)
-    $testarray=@()
-    $tasksxml=@()
-    $ArrayForWriteScheduledjobz=@()
+    #$tasksxml=@()
+    $arrayXMLMatches=@()
+    $arrayFormattedMatches=@()
     $Tasks | Foreach-Object {
         $currentTask = New-Object -TypeName PSCustomObject -Property @{
 	        'Name' = $_.name
@@ -102,41 +102,39 @@ process {
             $ruleMatch=$currentTask | Where-Object $scriptblock 
             if ($rulematch) {
                 #([xml]$_.xml).Task
-                #$rulematch
-                Remove-Variable ruleMatch
-               $ArrayForWriteScheduledjobz=([xml]$_.xml).Task 
+               $arrayXMLMatches+=([xml]$_.xml).Task 
+               $arrayFormattedMatches+=$ruleMatch
+               Remove-Variable ruleMatch
+               
             }
         }
-        else {$currentTask}
+        else {$currentTask
+            
+            }
         }   
 
-   return ,$ArrayForWriteScheduledjobz
-  
-
-    
-
+    if ($arrayXMLMatches -AND $arrayFormattedMatches) {
+        $arrayXMLMatches
+        $arrayFormattedMatches
+        }
     }
+
 }
 
 
 function write-scheduledjobz {
     param (
+        [Parameter(Mandatory=$true)]
         [string]
-        $Filter,
-        [string]
-        $UserName,
-        [switch]
-        $Enabled,
-        [string]
-        $TaskName,
-        [string]
-        $Trigger,
-        [string]
-        $Name
+        $TaskPath,
+        [Parameter(Mandatory=$true)]
+	[string]
+        $TaskName
     )
 
-$GetTaskResults=Get-ScheduledJobz -enabled
-$GetTaskResults
+$GetXMLResults,$GetFormattedResults=Get-ScheduledJobz -Path $TaskPath -TaskName $TaskName
+$GetXMLResults.task 
+
 
 }
 
