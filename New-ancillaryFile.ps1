@@ -20,36 +20,36 @@ function  New-ancillaryCSVFile {
     $columnHeaders=$instructions[0].psobject.properties | Select-Object -ExpandProperty name | ? { $_ -like "ID*" }
 
     foreach($line in $Instructions) {
-    [system.collections.arraylist]$SearchID=@()
-    [system.collections.arraylist]$whereObject=@()
-    $OutFile = $_.OutFile
-        if ($rownum=0) {
-            $rownum++
+        [system.collections.arraylist]$SearchID=@()
+        [system.collections.arraylist]$whereObject=@()
+        $OutFile = $_.OutFile
+            if ($rownum=0) {
+                $rownum++
+                }
+            else {
+                foreach ($column in $columnHeaders) {
+                    if (!$line.$column) {
+                        continue
+                        }
+                    else {
+                        $ColumnValue=$line.$column
+                        $SearchID.Add($columnValue) | Out-Null
+                        }
+                }            
             }
-        else {
-            foreach ($column in $columnHeaders) {
-                if (!$line.$column) {
-                    continue
-                    }
-                else {
-                    $ColumnValue=$line.$column
-                    $SearchID.Add($columnValue) | Out-Null
-                    
-                    }
-            }
+        
+    foreach ($id in $SearchID) {
+        $whereObject.add("`$_.ID_1` -eq $id") | Out-Null
         }
-        foreach ($id in $SearchID) {
-            $whereObject.add("`$_.ID_1` -eq $id") | Out-Null
-        }
-    }
     $whereObjectFilter=[scriptblock]::Create($whereObject -join ' -AND ')
     #$importedCSVFile | ? $whereObjectFilter | export-csv $outFile   <----- Create the CSV file 
     #Get path of CSV file so can provide full path to new-excelFile function
-    
     #New-ExcelFile -inputCSVFile $outFile -tabName $outFile
+    }    
+    
 }
                          
-function new-excelFile {
+function New-excelFile {
     param (
         $inputCSVFile,
         $tabName
