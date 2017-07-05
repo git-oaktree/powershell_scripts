@@ -41,7 +41,7 @@ function  New-ancillaryCSVFile {
     foreach ($id in $SearchID) {
         $whereObject.add("`$_.ID_1` -eq $id") | Out-Null
         }
-    $whereObjectFilter=[scriptblock]::Create($whereObject -join ' -AND ')
+    $whereObjectFilter=[scriptblock]::Create($whereObject -join ' -OR ')
     #$importedCSVFile | ? $whereObjectFilter | export-csv $outFile   <----- Create the CSV file 
     #Get path of CSV file so can provide full path to new-excelFile function
     #New-ExcelFile -inputCSVFile $outFile -tabName $outFile
