@@ -8,13 +8,14 @@ function  New-ancillaryCSVFile {
   param (
   [Parameter(mandatory=$True,Position=1)]
   [string]$instructionFile,
-  [string]$csvFile
+  [string]$csvFile,
+  [string]$DestinationPath=($pwd.path)
 
   )
 
   #Need to check if file exists. 
     $Instructions=Import-Csv $instructionFile
-    $importedCSVFile=Import-Csv $csvFile
+    $importedCSVFile=Import-Csv $csvFile 
     $rowNum=0
     [system.collections.arraylist]$SearchID=@()
     $columnHeaders=$instructions[0].psobject.properties | Select-Object -ExpandProperty name | ? { $_ -like "ID*" }
@@ -22,7 +23,8 @@ function  New-ancillaryCSVFile {
     foreach($line in $Instructions) {
         [system.collections.arraylist]$SearchID=@()
         [system.collections.arraylist]$whereObject=@()
-        $OutFile = $_.OutFile
+        $OutFile = $line.OutFile
+        write-verbose $outfile
             if ($rownum=0) {
                 $rownum++
                 }
@@ -39,12 +41,16 @@ function  New-ancillaryCSVFile {
             }
         
     foreach ($id in $SearchID) {
-        $whereObject.add("`$_.ID_1` -eq $id") | Out-Null
+        $whereObject.add("`$_.'Plugin ID'` -eq $id") | Out-Null
+        write-host $whereObject
         }
     $whereObjectFilter=[scriptblock]::Create($whereObject -join ' -OR ')
-    #$importedCSVFile | ? $whereObjectFilter | export-csv $outFile   <----- Create the CSV file 
+    write-verbose "about to parse csv file"
+    $destinationFullPath= $DestinationPath + '\' + $OutFile
+    Write-Verbose $destinationFullPath
+    $importedCSVFile | ? $whereObjectFilter | export-csv $destinationFullPath  # <----- Create the CSV file 
     #Get path of CSV file so can provide full path to new-excelFile function
-    #New-ExcelFile -inputCSVFile $outFile -tabName $outFile
+    #New-ExcelFile -inputCSVFile $destinationFullPat -tabName $outFile
     }    
     
 }
@@ -54,7 +60,7 @@ function New-excelFile {
         $inputCSVFile,
         $tabName
     )
-    $path = 'C:\Users\user\Desktop\customer.xlsx'
+    $path = 'C:\Users\oaktree_reguser\Desktop\csvs\testing\customer.xlsx'
     $row=1
     #$data=Import-Csv 'C:\users\user\Desktop\temp.csv' <--- No longer used
     #$page='ssl10'  <---- No longer used
