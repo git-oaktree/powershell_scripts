@@ -56,46 +56,61 @@ function  New-ancillaryCSVFile {
     $tabNames.Add($OutFile) | Out-Null
     $createdCSVFiles.Add($destinationFullPath) | Out-Null
     #Get path of CSV file so can provide full path to new-excelFile function
-    #New-ExcelFile -inputCSVFile $destinationFullPat -tabName $outFile
+    
     }    
-    Write-Output $tabNames
-    write-output $createdCSVFiles
+    New-ExcelFile -inputCsvFileList $createdCSVFiles -tabNameList $tabNames
+
 }
                          
 function New-excelFile {
     param (
-        [string[]]$inputCSVFile,
-        [string[]]$tabName
+        [string[]]$inputCsvFileList,
+        [string[]]$tabNameList,
+        [string[]]$columnHeaders
     )
     
-    Begin { 
-        $path = 'C:\Users\oaktree_reguser\Desktop\csvs\testing\customer.xlsx'
+    Begin {
+        $path ='C:\Users\user\Desktop\customer.xlsx'
         $row=1
-    #$data=Import-Csv 'C:\users\user\Desktop\temp.csv' <--- No longer used
-    #$page='ssl10'  <---- No longer used
-    $Excel=New-Object -Com Excel.Application
-    $Workbook=$Excel.Workbooks.open($path)
-    }
+        #$data=Import-Csv 'C:\users\user\Desktop\temp.csv' <--- No longer used
+        #$page='ssl10'  <---- No longer used
+        $Excel=New-Object -Com Excel.Application
+        $Workbook=$Excel.Workbooks.open($path)
 
-    Process {
-    $worksheet=$Workbook.Worksheets.Add()
-    $worksheet.name = $tabName
-    $worksheet = $Excel.worksheets.item($tabName)
-    $worksheet.Activate()
-    foreach($line in $inputCSVFile) {
-        $worksheet.Cells.Item($row,1) = $line.field1
-        $worksheet.Cells.Item($row,2) = $line.field2
-        $worksheet.Cells.Item($row,3) = $line.field3
-        $row++
-    }
-    $Excel.DisplayAlerts = $False
-    $workbook.save()
-    }
+        }
+       
+       Process {
+            [int]$counterForParameters=0
+            $max=$inputCsvFileList.count
+            
+            write-output $max
+            while ($counterForParameters -lt $max) {
+                $tabname=$($tabnameList[$counterForParameters])
+                $inputCsvName=$($inputCsvFileList[$counterForParameters])
+                Write-output $inputCsvName
+                $importedCsvFile=Import-Csv $inputCsvName
+                $worksheet=$Workbook.Worksheets.Add()
+                $worksheet.name = $tabname
+                $worksheet = $Excel.worksheets.item($tabname)
+                $worksheet.Activate()
+                foreach($line in $importedCsvFile) {
+                   $worksheet.Cells.Item($row,1) = $line.CVE
+                   $worksheet.Cells.Item($row,2) = $line.CVSS
+                   $worksheet.Cells.Item($row,3) = $line.Host
+                   $row++
+               }
+            $counterForParameters++
+            write-output "incrementing counter for parameters variable"
+            $row=1
+            }
+        }
     End {
-    $Workbook.close($true)
-    $excel.quit()
-    Remove-Variable Excel
-    [gc]::collect()
-    [gc]::WaitForPendingFinalizers()
-    }
+            $Excel.DisplayAlerts = $False
+            $workbook.save()
+            $Workbook.close($true)
+            $excel.quit()
+            Remove-Variable Excel
+            [gc]::collect()
+            [gc]::WaitForPendingFinalizers()
+        }
 }
