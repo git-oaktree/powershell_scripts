@@ -8,21 +8,24 @@ function  New-ancillaryCSVFile {
   param (
   [Parameter(mandatory=$True,Position=1)]
   [string]$instructionFile,
-  [string]$csvFile,
+  [string]$FindingsFile,
   [string]$DestinationPath=($pwd.path)
 
   )
 
   #Need to check if file exists. 
     $Instructions=Import-Csv $instructionFile
-    $importedCSVFile=Import-Csv $csvFile 
+    $importedCSVFile=Import-Csv $FindingsFile 
     $rowNum=0
     [system.collections.arraylist]$SearchID=@()
     $columnHeaders=$instructions[0].psobject.properties | Select-Object -ExpandProperty name | ? { $_ -like "ID*" }
+    [system.collections.arraylist]$tabNames=@()
+    [system.collections.arraylist]$createdCSVFiles=@()
 
     foreach($line in $Instructions) {
         [system.collections.arraylist]$SearchID=@()
         [system.collections.arraylist]$whereObject=@()
+
         $OutFile = $line.OutFile
         write-verbose $outfile
             if ($rownum=0) {
@@ -42,30 +45,39 @@ function  New-ancillaryCSVFile {
         
     foreach ($id in $SearchID) {
         $whereObject.add("`$_.'Plugin ID'` -eq $id") | Out-Null
-        write-host $whereObject
+        
         }
     $whereObjectFilter=[scriptblock]::Create($whereObject -join ' -OR ')
+    
     write-verbose "about to parse csv file"
-    $destinationFullPath= $DestinationPath + '\' + $OutFile
+    $destinationFullPath= $DestinationPath + '\' + $OutFile + '.csv'
     Write-Verbose $destinationFullPath
     $importedCSVFile | ? $whereObjectFilter | export-csv $destinationFullPath  # <----- Create the CSV file 
+    $tabNames.Add($OutFile) | Out-Null
+    $createdCSVFiles.Add($destinationFullPath) | Out-Null
     #Get path of CSV file so can provide full path to new-excelFile function
     #New-ExcelFile -inputCSVFile $destinationFullPat -tabName $outFile
     }    
-    
+    Write-Output $tabNames
+    write-output $createdCSVFiles
 }
                          
 function New-excelFile {
     param (
-        $inputCSVFile,
-        $tabName
+        [string[]]$inputCSVFile,
+        [string[]]$tabName
     )
-    $path = 'C:\Users\oaktree_reguser\Desktop\csvs\testing\customer.xlsx'
-    $row=1
+    
+    Begin { 
+        $path = 'C:\Users\oaktree_reguser\Desktop\csvs\testing\customer.xlsx'
+        $row=1
     #$data=Import-Csv 'C:\users\user\Desktop\temp.csv' <--- No longer used
     #$page='ssl10'  <---- No longer used
     $Excel=New-Object -Com Excel.Application
     $Workbook=$Excel.Workbooks.open($path)
+    }
+
+    Process {
     $worksheet=$Workbook.Worksheets.Add()
     $worksheet.name = $tabName
     $worksheet = $Excel.worksheets.item($tabName)
@@ -78,9 +90,12 @@ function New-excelFile {
     }
     $Excel.DisplayAlerts = $False
     $workbook.save()
+    }
+    End {
     $Workbook.close($true)
     $excel.quit()
     Remove-Variable Excel
     [gc]::collect()
     [gc]::WaitForPendingFinalizers()
+    }
 }
