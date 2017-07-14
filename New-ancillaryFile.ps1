@@ -9,6 +9,7 @@ function  New-ancillaryCSVFile {
   [Parameter(mandatory=$True,Position=1)]
   [string]$instructionFile,
   [string]$FindingsFile,
+  [string]$ExcelFindingsFile,
   [string]$DestinationPath=($pwd.path)
 
   )
@@ -51,6 +52,7 @@ function  New-ancillaryCSVFile {
     
     write-verbose "about to parse csv file"
     $destinationFullPath= $DestinationPath + '\' + $OutFile + '.csv'
+    $excelDestinationFullpath=$DestinationPath + '\' + $ExcelFindingsFile + '.xlsx'
     Write-Verbose $destinationFullPath
     $importedCSVFile | ? $whereObjectFilter | export-csv $destinationFullPath  # <----- Create the CSV file 
     $tabNames.Add($OutFile) | Out-Null
@@ -58,7 +60,7 @@ function  New-ancillaryCSVFile {
     #Get path of CSV file so can provide full path to new-excelFile function
     
     }    
-    New-ExcelFile -inputCsvFileList $createdCSVFiles -tabNameList $tabNames
+    New-ExcelFile -inputCsvFileList $createdCSVFiles -tabNameList $tabNames -excelFile $excelDestinationFullpath
 
 }
                          
@@ -66,38 +68,42 @@ function New-excelFile {
     param (
         [string[]]$inputCsvFileList,
         [string[]]$tabNameList,
-        [string[]]$columnHeaders
+        [string]$excelFile
+        
     )
     
     Begin {
-        $path ='C:\Users\user\Desktop\customer.xlsx'
+        $path ='C:\Users\ofpagua\Desktop\customer.xlsx'
         $row=1
+        $columNum=1
         #$data=Import-Csv 'C:\users\user\Desktop\temp.csv' <--- No longer used
         #$page='ssl10'  <---- No longer used
         $Excel=New-Object -Com Excel.Application
-        $Workbook=$Excel.Workbooks.open($path)
+        $workbook=$excel.workbooks.add()
+        ######$Workbook=$Excel.Workbooks.open($path)
 
         }
        
        Process {
             [int]$counterForParameters=0
             $max=$inputCsvFileList.count
-            
-            write-output $max
             while ($counterForParameters -lt $max) {
                 $tabname=$($tabnameList[$counterForParameters])
                 $inputCsvName=$($inputCsvFileList[$counterForParameters])
                 Write-output $inputCsvName
                 $importedCsvFile=Import-Csv $inputCsvName
+                $columnHeaders=$importedCsvFile[0].psobject.Properties | Select-Object -ExpandProperty Name
                 $worksheet=$Workbook.Worksheets.Add()
                 $worksheet.name = $tabname
                 $worksheet = $Excel.worksheets.item($tabname)
                 $worksheet.Activate()
                 foreach($line in $importedCsvFile) {
-                   $worksheet.Cells.Item($row,1) = $line.CVE
-                   $worksheet.Cells.Item($row,2) = $line.CVSS
-                   $worksheet.Cells.Item($row,3) = $line.Host
-                   $row++
+                    foreach ($column in $columnHeaders) {
+                        $worksheet.Cells.Item($row,$columNum) = $line.$column
+                        $columNum++
+                        }
+                    $columNum=1
+                    $row++
                }
             $counterForParameters++
             write-output "incrementing counter for parameters variable"
@@ -106,7 +112,8 @@ function New-excelFile {
         }
     End {
             $Excel.DisplayAlerts = $False
-            $workbook.save()
+            ######$workbook.save()
+            $workbook.saveas($excelFile)
             $Workbook.close($true)
             $excel.quit()
             Remove-Variable Excel
