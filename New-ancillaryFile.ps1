@@ -1,5 +1,5 @@
 function  New-ancillaryCSVFile {
-  <# script is specific to a task that I need to do on a frequently. Sharing for the sake of sharing in hopes someone may find it useful
+  <# script is specific to a task that I need to frequently. Sharing for the sake of sharing in hopes someone may find it useful
   Code cobbled together by looking at the following resources: 
   http://sqlmag.com/powershell/update-excel-spreadsheets-powershell
   https://blogs.technet.microsoft.com/heyscriptingguy/2010/09/09/copy-csv-columns-to-an-excel-spreadsheet-by-using-powershell/
@@ -73,7 +73,6 @@ function New-excelFile {
     )
     
     Begin {
-        $path ='C:\Users\ofpagua\Desktop\customer.xlsx'
         $row=1
         $columNum=1
         #$data=Import-Csv 'C:\users\user\Desktop\temp.csv' <--- No longer used
@@ -106,7 +105,6 @@ function New-excelFile {
                     $row++
                }
             $counterForParameters++
-            write-output "incrementing counter for parameters variable"
             $row=1
             }
         }
