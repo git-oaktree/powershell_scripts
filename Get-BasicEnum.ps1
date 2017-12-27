@@ -46,7 +46,7 @@ function Get-BasicEnum{
 
 	write-output "##############################################################################"
 	write-output 'GPO Results'
-    gporesults.exe /Z
+    gporesult.exe /Z
 
 	write-output "##############################################################################"
 	write-output 'netstat output'
