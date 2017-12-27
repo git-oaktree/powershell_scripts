@@ -25,7 +25,7 @@ function Get-BasicEnum{
 	gci 'c:\'
     
     write-output "##############################################################################"
-	write-output 'Directory listing of C:\'
+	write-output 'Directory listing of C:\program files'
 	gci 'C:\Program Files' 
     
     write-output "##############################################################################"
