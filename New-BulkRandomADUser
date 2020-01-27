@@ -1,0 +1,24 @@
+import-module activeDirectory
+$firstnames = @("James" ,"John" ,"Robert" ,"Michael" ,"William" ,"Ronald" ,"Anthony" ,"Kevin" ,"Jason" ,"Jeff" ,"David" ,"Richard" ,"Charles" ,"Joseph" ,"Thomas" ,"George" ,"Kenneth" ,"Steven" ,"Edward" ,"Brian" ,"Christopher" ,"Daniel" ,"Paul" ,"Mark" ,"Donald")
+$lastnames = @("Smith" ,"Johson" ,"William" ,"Jones" ,"Brown" ,"Davis" ,"Miller" ,"Wilson" ,"Moore" ,"Taylor" ,"Anderson" ,"Thomas" ,"Jackson" ,"White")  
+
+
+1..100 | ForEach-Object {
+    $firstname = $firstnames[$(Get-Random -Minimum 0 -Maximum $($firstnames.Length -1))]
+    $lastname = $lastnames[$(Get-Random -Minimum 0 -Maximum $($lastnames.Length -1))]
+    $firstname = $firstname.ToLower()
+    $lastname = $lastname.ToLower()
+    $firstletter = $firstname[0]
+    $user = "$firstname $lastname"
+
+    $Displayname = $user         
+    $UserFirstname = $firstname           
+    $UserLastname = $lastname            
+    $OU = "CN=Users,DC=spiderweb,dc=local" 
+    $SAM = "$firstletter$lastname"
+    $UPN = $firstname + "." + $lastname + "@" + "east.spiderweb.local"            
+    $Description = "Domain User"            
+    $Password = 'password'  
+    New-ADUser -Name "$Displayname" -DisplayName "$Displayname" -SamAccountName $SAM -UserPrincipalName $UPN -GivenName "$UserFirstname" -Surname "$UserLastname" -Description "$Description" -AccountPassword (ConvertTo-SecureString $Password -AsPlainText -Force) -Enabled $true -Path "CN=Users,DC=east,DC=Spiderweb,DC=Local" -ChangePasswordAtLogon $false -PasswordNeverExpires $true
+    write-host "User $user created" 
+}          
