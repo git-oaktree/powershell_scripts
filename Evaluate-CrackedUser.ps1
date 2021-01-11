@@ -1,3 +1,5 @@
+#requires -Modules PowerView
+
 function Evaluate-CrackedUser {
 <#
 
