@@ -1,6 +1,6 @@
 $baddate = [DateTime] "12/31/1600 7:00:00 PM"
 $30dayDate= (Get-date).addDays(-30)
-$180dayDate= (Get-date).addDays(-30)
+$180dayDate= (Get-date).addDays(-180)
 $oneYearDate= (Get-date).AddYears(-1)
 
 $older30days = $users  | ? { ($_.pwdlastSet -lt $30dayDate) -and ($_.pwdlastset -ne $baddate) } | measure-object
