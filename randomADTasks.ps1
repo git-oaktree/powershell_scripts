@@ -8,3 +8,22 @@ function resolve-SID($sid)  {
  
 ResolveSid(<sid here> 
   
+
+function modifyWriteTime {
+[CmdletBinding()]
+Param (
+    [Parameter(Position = 0)]
+    [String]
+    $sourceFilename, 
+
+    [Parameter(Position = 0)]
+    [String]
+    $destinationFilename 
+ )
+
+ 
+ $tempTimeStamp = (gci $sourceFilename).LastWriteTime
+ $newTimeStamp = ($tempTimeStamp).Tostring("MM/dd/yyyy HH:mm")
+ gci $destinationFilename | % { $_.LastWriteTime = $newTimeStamp }
+
+}
